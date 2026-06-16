@@ -1,0 +1,40 @@
+import { REGISTRY } from '../layers/registry';
+import { BLEND_MODES } from '../engine/blendMap';
+import LayerControls from './LayerControls';
+import FxControls from './FxControls';
+
+/* Right panel — shows details for the currently selected layer. */
+export default function LayerDetail({ layer, dispatch }){
+  if(!layer) return (
+    <div className="detail-empty">
+      <span className="label">select a layer to edit</span>
+    </div>
+  );
+
+  const m = REGISTRY[layer.type]?.manifest;
+  const set = (patch) => dispatch({ type:'SET', id:layer.id, patch });
+
+  return (
+    <div className="layer-detail">
+      <div className="detail-header">
+        <span className="detail-name">{m?.label || layer.type}</span>
+        <span className="tag">{m?.tag}</span>
+      </div>
+      <div className="detail-body">
+        <div className="ctrl">
+          <label>Opacity</label>
+          <input type="range" min="0" max="1" step="0.01" value={layer.opacity} onChange={e => set({ opacity:+e.target.value })} />
+          <span className="val">{Math.round(layer.opacity*100)}%</span>
+        </div>
+        <div className="ctrl">
+          <label>Blend</label>
+          <select value={layer.blend} onChange={e => set({ blend:e.target.value })}>
+            {BLEND_MODES.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+        </div>
+        <LayerControls layer={layer} dispatch={dispatch} />
+        <FxControls layer={layer} dispatch={dispatch} />
+      </div>
+    </div>
+  );
+}
