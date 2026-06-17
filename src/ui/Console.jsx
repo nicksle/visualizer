@@ -1,82 +1,33 @@
-import { useRef, useState } from 'react';
-import AddLayerMenu from './AddLayerMenu';
+import { useState, useEffect } from 'react';
 import MasterPanel from './MasterPanel';
 import GradePanel from './GradePanel';
 import BackdropPanel from './BackdropPanel';
 import ExportPanel from './ExportPanel';
-import PresetPanel from './PresetPanel';
-import LayerCard from './LayerCard';
-import LayerDetail from './LayerDetail';
+import BuildPanel from './BuildPanel';
+import SequencerPanel from './SequencerPanel';
 
-/* Left rail — Presets + Layer list (Figma-style). */
-export function LeftRail({ layers, dispatch, selectedId, onSelect, addMenuOpen, setAddMenuOpen }){
-  const listRef = useRef(null);
-
-  const onDragStart = (id, e) => {
-    e.dataTransfer.effectAllowed = 'move';
-    const card = e.target.closest('.layerrow');
-    if(card) card.classList.add('dragging');
-  };
-
-  const onDragEnd = () => {
-    const list = listRef.current; if(!list) return;
-    const card = list.querySelector('.layerrow.dragging');
-    if(card) card.classList.remove('dragging');
-    const domIds = [...list.querySelectorAll('.layerrow[data-lid]')].map(el => el.dataset.lid);
-    const newOrder = domIds.slice().reverse();
-    dispatch({ type:'REORDER', order:newOrder });
-  };
-
-  const onDragOver = (e) => {
-    const list = listRef.current; if(!list) return;
-    const dragging = list.querySelector('.layerrow.dragging'); if(!dragging) return;
-    e.preventDefault();
-    const items = [...list.querySelectorAll('.layerrow:not(.dragging)')];
-    let best = null, bestOff = -Infinity;
-    for(const el of items){
-      const b = el.getBoundingClientRect();
-      const off = e.clientY - b.top - b.height / 2;
-      if(off < 0 && off > bestOff){ bestOff = off; best = el; }
-    }
-    if(best == null) list.appendChild(dragging);
-    else list.insertBefore(dragging, best);
-  };
+/* Left rail — tabbed: Build (preset workspace) | Sequence. */
+export function LeftRail({ layers, dispatch, selectedId, onSelect, addMenuOpen, setAddMenuOpen, applyPreset, crossfadeDip }){
+  const [tab, setTab] = useState('build');
 
   return (
     <div className="rail rail-left">
-      <PresetPanel layers={layers} dispatch={dispatch} />
-      <div className="section">
-        <div className="head">
-          <span className="label">Layers · {layers.length}</span>
-          <button className="btn" onClick={() => setAddMenuOpen(o => !o)} style={{fontSize:9, padding:'3px 8px'}}>
-            {addMenuOpen ? '− Close' : '+ Add'}
-          </button>
-        </div>
-        <div className="body">
-          <div className="layer-list" ref={listRef} onDragOver={onDragOver} onDrop={e => e.preventDefault()}>
-            {layers.length === 0 && <div className="label">no layers — press + Add</div>}
-            {layers.slice().reverse().map(L => (
-              <LayerCard
-                key={L.id} layer={L} dispatch={dispatch}
-                selected={L.id === selectedId}
-                onSelect={onSelect}
-                onDragStart={onDragStart} onDragEnd={onDragEnd}
-              />
-            ))}
-          </div>
-        </div>
+      <div className="left-tabs">
+        <button className={'left-tab' + (tab === 'build' ? ' active' : '')} onClick={() => setTab('build')}>Build</button>
+        <button className={'left-tab' + (tab === 'sequence' ? ' active' : '')} onClick={() => setTab('sequence')}>Sequence</button>
       </div>
-    </div>
-  );
-}
 
-/* Right rail — selected layer detail only. */
-export function RightRail({ layers, dispatch, selectedId }){
-  const selectedLayer = layers.find(L => L.id === selectedId) || null;
+      {tab === 'build' && (
+        <BuildPanel
+          layers={layers} dispatch={dispatch} applyPreset={applyPreset}
+          selectedId={selectedId} onSelect={onSelect}
+          addMenuOpen={addMenuOpen} setAddMenuOpen={setAddMenuOpen}
+        />
+      )}
 
-  return (
-    <div className="rail rail-right">
-      <LayerDetail layer={selectedLayer} dispatch={dispatch} />
+      {tab === 'sequence' && (
+        <SequencerPanel applyPreset={applyPreset} crossfadeDip={crossfadeDip} />
+      )}
     </div>
   );
 }
@@ -84,6 +35,47 @@ export function RightRail({ layers, dispatch, selectedId }){
 import BaseQueue from './BaseQueue';
 
 /* Bottom toolbar — Master, Grade, Backdrop, Export, Base Video as expandable buttons. */
+const ASPECTS = [
+  { key:'fill',  label:'Fill' },
+  { key:'16:9',  label:'16:9',  ratio:16/9 },
+  { key:'4:3',   label:'4:3',   ratio:4/3 },
+  { key:'1:1',   label:'1:1',   ratio:1 },
+  { key:'9:16',  label:'9:16',  ratio:9/16 },
+  { key:'21:9',  label:'21:9',  ratio:21/9 },
+];
+
+function DisplayPanel({ stageRef }){
+  const [aspect, setAspect] = useState('fill');
+
+  useEffect(() => {
+    const el = stageRef?.current; if(!el) return;
+    const chosen = ASPECTS.find(a => a.key === aspect);
+    if(!chosen || !chosen.ratio){
+      el.style.aspectRatio = '';
+      el.style.maxWidth = '';
+      el.style.maxHeight = '';
+      el.style.margin = '12px';
+    } else {
+      el.style.aspectRatio = `${chosen.ratio}`;
+      el.style.maxWidth = '100%';
+      el.style.maxHeight = '100%';
+      el.style.margin = '12px auto';
+    }
+  }, [aspect, stageRef]);
+
+  return (
+    <div className="row" style={{gap:6, flexWrap:'wrap'}}>
+      <span className="label">Aspect</span>
+      {ASPECTS.map(a => (
+        <button key={a.key} className={'btn' + (aspect === a.key ? ' on' : '')}
+          onClick={() => setAspect(a.key)} style={{fontSize:9, padding:'3px 8px'}}>
+          {a.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function BottomBar({ layers, dispatch, recorder, stageRef, videoRef }){
   const [open, setOpen] = useState(null);
   const toggle = (key) => setOpen(o => o === key ? null : key);
@@ -94,6 +86,7 @@ export function BottomBar({ layers, dispatch, recorder, stageRef, videoRef }){
     { key:'backdrop', label:'Backdrop' },
     { key:'export',   label:'Export' },
     { key:'base',     label:'Base Video' },
+    { key:'display',  label:'Display' },
   ];
 
   return (
@@ -110,6 +103,7 @@ export function BottomBar({ layers, dispatch, recorder, stageRef, videoRef }){
           {open === 'backdrop' && <BackdropPanel />}
           {open === 'export' && <ExportPanel recorder={recorder} stageRef={stageRef} />}
           {open === 'base' && <BaseQueue videoRef={videoRef} />}
+          {open === 'display' && <DisplayPanel stageRef={stageRef} />}
         </div>
       )}
     </div>

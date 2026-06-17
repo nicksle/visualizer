@@ -11,7 +11,7 @@ export default function Stage({ layers }){
         const C = entry.Component;
         return (
           <LayerErrorBoundary key={L.id} label={L.type}>
-            <C id={L.id} opacity={L.opacity} blend={L.blend} enabled={L.enabled} fx={L.fx} params={L.params} />
+            <C id={L.id} opacity={L.opacity} blend={L.blend} enabled={L.enabled} fx={L.fx} params={L.params} originX={L.originX} originY={L.originY} />
           </LayerErrorBoundary>
         );
       })}

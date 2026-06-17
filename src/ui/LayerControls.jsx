@@ -2,7 +2,11 @@ import { REGISTRY } from '../layers/registry';
 
 /* Renders a layer's controls from its manifest schema. Handles the standard
    types (range/select/color/checkbox) plus the custom asset loaders
-   (images -> HTMLImageElement[]; motion -> video/image element). */
+   (images -> HTMLImageElement[]; motion -> video/image element).
+
+   Smart grouping: when a select control has 'off' as an option and its current
+   value is 'off', subsequent controls are hidden until the next select/checkbox
+   (i.e. the next "toggle"). This keeps the panel clean. */
 export default function LayerControls({ layer, dispatch }){
   const controls = REGISTRY[layer.type]?.manifest.controls || [];
   const set = (key, value) => dispatch({ type:'SET_PARAM', id:layer.id, key, value });
@@ -31,9 +35,23 @@ export default function LayerControls({ layer, dispatch }){
     }
   };
 
+  // figure out which controls are hidden based on parent toggle state
+  const visible = [];
+  let suppressed = false;
+  for(const c of controls){
+    // select with 'off' option or checkbox = a toggle point
+    const isToggle = (c.type === 'select' && c.options?.includes('off')) || c.type === 'checkbox';
+    if(isToggle){
+      suppressed = (c.type === 'select' && val(c) === 'off') || (c.type === 'checkbox' && !val(c));
+      visible.push(c); // always show the toggle itself
+    } else {
+      if(!suppressed) visible.push(c);
+    }
+  }
+
   return (
     <>
-      {controls.map(c => {
+      {visible.map(c => {
         if(c.type === 'range') return (
           <div className="ctrl" key={c.key}>
             <label>{c.label}</label>

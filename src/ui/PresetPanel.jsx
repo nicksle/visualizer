@@ -1,14 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useEngine } from '../engine/EngineContext';
 import { SIG } from '../engine/signal';
 import {
   lsAvailable, getOrderedPresets, savePresetSlot, deletePreset,
   reorderPresets, downloadPreset, capturePreset, exportPresetBundle,
-  importPresetFile, deserializeLayers,
+  importPresetFile,
 } from '../state/presets';
 
-export default function PresetPanel({ layers, dispatch }){
-  const engine = useEngine();
+export default function PresetPanel({ layers, dispatch, applyPreset }){
   const [name, setName] = useState('');
   const [presets, setPresets] = useState([]);
   const [sel, setSel] = useState(new Set());
@@ -24,16 +22,6 @@ export default function PresetPanel({ layers, dispatch }){
   const flash = (msg) => {
     setHint(msg);
     setTimeout(() => setHint(''), 1800);
-  };
-
-  const applyPreset = (p) => {
-    if(!p || !Array.isArray(p.layers)) return;
-    const deserialized = deserializeLayers(p.layers);
-    dispatch({ type:'HYDRATE', layers:deserialized });
-    if(p.master && typeof p.master.intensity === 'number'){
-      SIG.intensity = Math.max(0, Math.min(1, p.master.intensity));
-      engine.setIntensity(SIG.intensity);
-    }
   };
 
   const onSave = () => {
@@ -139,7 +127,7 @@ export default function PresetPanel({ layers, dispatch }){
     : 'Storage is blocked here. Use \u2913 EXPORT / \u2912 IMPORT files.';
 
   return (
-    <div className="section">
+    <>
       <div className="head"><span className="label">Presets {presets.length ? `[${presets.length}]` : ''}</span></div>
       <div className="body">
         <div className="row">
@@ -180,6 +168,6 @@ export default function PresetPanel({ layers, dispatch }){
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -15,6 +15,8 @@ export function makeLayer(type){
     opacity: m.defaultOpacity ?? 1,
     blend: m.defaultBlend ?? 'normal',
     collapsed: false,
+    originX: 0,
+    originY: 0,
     fx: [],
     params: defaultParams(type),
   };
@@ -57,6 +59,8 @@ export function layersReducer(state, action){
         opacity: typeof L.opacity === 'number' ? L.opacity : 1,
         blend: L.blend || 'normal',
         collapsed: false,
+        originX: L.originX || 0,
+        originY: L.originY || 0,
         fx: L.fx || [],
         params: { ...defaultParams(L.type), ...L.params },
       }));
