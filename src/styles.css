@@ -18,7 +18,7 @@ body{
   color:var(--ink); font-family:var(--mono); font-size:12px; overflow:hidden;
 }
 button,input,select{ font-family:var(--mono); color:var(--ink); }
-.app{ display:grid; grid-template-columns:280px 1fr; grid-template-rows:1fr auto; height:100%; gap:0; background:var(--bg); border-radius:var(--rad); overflow:hidden; }
+.app{ display:grid; grid-template-columns:280px 1fr; grid-template-rows:1fr auto; height:100%; gap:0; background:transparent; border-radius:var(--rad); overflow:hidden; }
 .app.solo{ grid-template-columns:1fr; grid-template-rows:1fr; }
 .app.solo .rail, .app.solo .bottombar{ display:none; }
 
@@ -27,7 +27,7 @@ button,input,select{ font-family:var(--mono); color:var(--ink); }
 .stage > canvas{ position:absolute; inset:0; }
 
 .rail{
-  background:var(--bg);
+  background:transparent;
   overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px;
 }
 .rail-left{

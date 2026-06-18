@@ -46,6 +46,11 @@ export default function LayerDetail({ layer, dispatch }){
           <span className="val">{layer.scale || 100}%</span>
         </div>
         <div className="ctrl">
+          <label>Rotation</label>
+          <input type="range" min="0" max="360" step="1" value={layer.rotation || 0} onChange={e => set({ rotation:+e.target.value })} />
+          <span className="val">{layer.rotation || 0}°</span>
+        </div>
+        <div className="ctrl">
           <label>Blend</label>
           <select value={layer.blend} onChange={e => set({ blend:e.target.value })}>
             {BLEND_MODES.map(b => <option key={b} value={b}>{b}</option>)}
