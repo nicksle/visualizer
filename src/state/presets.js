@@ -66,13 +66,15 @@ function serializeLayer(L){
 }
 
 /* ---- capture preset ---- */
-export function capturePreset(name, layers, intensity){
-  return {
+export function capturePreset(name, layers, intensity, thumb){
+  const p = {
     app: 'hard-reset', kind: 'preset', v: PRESET_VER,
     name: name || 'preset', ts: Date.now(),
     master: { intensity: intensity ?? SIG.intensity },
     layers: layers.map(serializeLayer),
   };
+  if(thumb) p.thumb = thumb;
+  return p;
 }
 
 /* ---- deserialize layers for HYDRATE ---- */
@@ -108,9 +110,9 @@ export function deserializeLayers(savedLayers){
 /* ---- localStorage slot ops ---- */
 export function loadAllPresets(){ return lsLoadAll(); }
 
-export function savePresetSlot(name, layers, intensity){
+export function savePresetSlot(name, layers, intensity, thumb){
   const all = lsLoadAll();
-  all[name] = capturePreset(name, layers, intensity);
+  all[name] = capturePreset(name, layers, intensity, thumb);
   const ok = lsSaveAll(all);
   if(ok) lsSaveOrder(orderedPresetNames(all));
   return ok;

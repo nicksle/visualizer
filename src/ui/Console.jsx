@@ -7,7 +7,7 @@ import BuildPanel from './BuildPanel';
 import SequencerPanel from './SequencerPanel';
 
 /* Left rail — tabbed: Build (preset workspace) | Sequence. */
-export function LeftRail({ layers, dispatch, selectedId, onSelect, addMenuOpen, setAddMenuOpen, applyPreset, crossfadeDip }){
+export function LeftRail({ layers, dispatch, selectedId, onSelect, addMenuOpen, setAddMenuOpen, applyPreset, crossfadeDip, stageRef }){
   const [tab, setTab] = useState('build');
 
   return (
@@ -22,6 +22,7 @@ export function LeftRail({ layers, dispatch, selectedId, onSelect, addMenuOpen, 
           layers={layers} dispatch={dispatch} applyPreset={applyPreset}
           selectedId={selectedId} onSelect={onSelect}
           addMenuOpen={addMenuOpen} setAddMenuOpen={setAddMenuOpen}
+          stageRef={stageRef}
         />
       )}
 

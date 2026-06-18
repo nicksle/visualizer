@@ -3,7 +3,14 @@
 import { PRIDE } from '../layers/_helpers';
 
 export const BACKDROPS = {
-  ember: { label:'Ember (default)', draw(ctx,t,W,H,lvl){
+  none: { label:'None', draw(ctx,t,W,H,lvl){
+    ctx.clearRect(0,0,W,H);
+  }},
+  solid: { label:'Solid Color', draw(ctx,t,W,H,lvl,opts){
+    ctx.fillStyle = opts?.color || '#000000';
+    ctx.fillRect(0,0,W,H);
+  }},
+  ember: { label:'Ember', draw(ctx,t,W,H,lvl){
     const g=ctx.createLinearGradient(0,0,W,H),a=Math.sin(t*0.2)*0.5+0.5;
     g.addColorStop(0,`hsl(${20+a*15},80%,${4+lvl*4}%)`);
     g.addColorStop(0.5,`hsl(0,0%,${3+lvl*3}%)`);

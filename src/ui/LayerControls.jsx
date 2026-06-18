@@ -35,10 +35,17 @@ export default function LayerControls({ layer, dispatch }){
     }
   };
 
-  // figure out which controls are hidden based on parent toggle state
+  // figure out which controls are hidden based on parent toggle state or showWhen
   const visible = [];
   let suppressed = false;
   for(const c of controls){
+    // explicit showWhen — check independently of suppression
+    if(c.showWhen){
+      const dep = layer.params[c.showWhen.key] ?? controls.find(x => x.key === c.showWhen.key)?.def;
+      if(dep !== c.showWhen.is) continue;
+      visible.push(c);
+      continue;
+    }
     // select with 'off' option or checkbox = a toggle point
     const isToggle = (c.type === 'select' && c.options?.includes('off')) || c.type === 'checkbox';
     if(isToggle){
@@ -82,6 +89,37 @@ export default function LayerControls({ layer, dispatch }){
             <span style={{flex:1}} />
           </div>
         );
+        if(c.type === 'colorlist'){
+          const colors = Array.isArray(layer.params[c.key]) ? layer.params[c.key] : (c.def || []);
+          const update = (next) => set(c.key, next);
+          return (
+            <div className="ctrl" key={c.key} style={{alignItems:'flex-start'}}>
+              <label>{c.label}</label>
+              <div className="colorlist">
+                {colors.map((col, i) => (
+                  <div key={i} className="colorlist-item"
+                    draggable
+                    onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)); }}
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => {
+                      e.preventDefault();
+                      const from = +e.dataTransfer.getData('text/plain');
+                      if(isNaN(from) || from === i) return;
+                      const next = colors.slice();
+                      const [moved] = next.splice(from, 1);
+                      next.splice(i, 0, moved);
+                      update(next);
+                    }}
+                  >
+                    <input type="color" value={col} onChange={e => { const next = colors.slice(); next[i] = e.target.value; update(next); }} />
+                    {colors.length > 1 && <button className="colorlist-x" onClick={() => update(colors.filter((_, j) => j !== i))}>✕</button>}
+                  </div>
+                ))}
+                <button className="colorlist-add" onClick={() => update([...colors, '#ffffff'])}>+</button>
+              </div>
+            </div>
+          );
+        }
         if(c.type === 'images') return (
           <div className="ctrl" key={c.key} style={{alignItems:'flex-start'}}>
             <label>{c.label}</label>

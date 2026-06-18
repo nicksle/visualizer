@@ -17,11 +17,11 @@ export default function LayerCard({ layer, dispatch, selected, onSelect, onDragS
         onDragEnd={onDragEnd}
         title="Drag to reorder"
       >{'\u2807'}</span>
-      <input
-        type="checkbox" checked={layer.enabled}
-        onChange={e => { e.stopPropagation(); set({ enabled:e.target.checked }); }}
-        title="enable"
-      />
+      <button
+        className={'eye-toggle' + (layer.enabled ? '' : ' off')}
+        onClick={e => { e.stopPropagation(); set({ enabled:!layer.enabled }); }}
+        title={layer.enabled ? 'Hide layer' : 'Show layer'}
+      >{layer.enabled ? '👁' : '👁‍🗨'}</button>
       <span className="layerrow-name">{m?.label || layer.type}</span>
       <span className="tag">{m?.tag}</span>
       <button className="iconbtn" onClick={e => { e.stopPropagation(); dispatch({ type:'REMOVE', id:layer.id }); }} title="delete">✕</button>

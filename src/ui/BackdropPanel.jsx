@@ -4,20 +4,21 @@ import { BACKDROPS, BACKDROP_KEYS } from '../engine/backdrops';
 
 export default function BackdropPanel(){
   const engine = useEngine();
-  const [active, setActive] = useState(true);
   const [key, setKey] = useState('ember');
+  const [color, setColor] = useState('#000000');
 
   useEffect(() => {
-    engine.setBackdrop({ active, key });
-  }, [engine, active, key]);
+    engine.setBackdrop({
+      active: key !== 'none',
+      key,
+      opts: { color },
+    });
+  }, [engine, key, color]);
 
   return (
     <div className="section">
       <div className="head">
         <span className="label">Backdrop</span>
-        <button className={'btn' + (active ? ' on' : '')} onClick={() => setActive(a => !a)} style={{fontSize:9, padding:'3px 6px'}}>
-          {active ? 'On' : 'Off'}
-        </button>
       </div>
       <div className="body">
         <div className="ctrl">
@@ -26,6 +27,13 @@ export default function BackdropPanel(){
             {BACKDROP_KEYS.map(k => <option key={k} value={k}>{BACKDROPS[k].label}</option>)}
           </select>
         </div>
+        {key === 'solid' && (
+          <div className="ctrl">
+            <label>Color</label>
+            <input type="color" value={color} onChange={e => setColor(e.target.value)} />
+            <span style={{flex:1}} />
+          </div>
+        )}
       </div>
     </div>
   );

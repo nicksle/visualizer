@@ -7,7 +7,7 @@ import { cssBlend } from '../engine/blendMap';
    output matches the vanilla build pixel-for-pixel. Control params live on `s`
    (exactly like vanilla L.state), assigned fresh each frame so live edits apply. */
 export function makeLayer(def){
-  function LayerComp({ id, opacity = def.opacity, blend = def.blend, enabled = true, fx, params, originX = 0, originY = 0 }){
+  function LayerComp({ id, opacity = def.opacity, blend = def.blend, enabled = true, fx, params, originX = 0, originY = 0, scale = 100 }){
     const paramsRef = useRef(params); paramsRef.current = params;
 
     const onResize = useCallback((W, H, s) => {
@@ -29,7 +29,7 @@ export function makeLayer(def){
           position:'absolute', inset:0, width:'100%', height:'100%',
           opacity, mixBlendMode: cssBlend(blend), pointerEvents:'none',
           display: enabled ? 'block' : 'none',
-          transform: (originX || originY) ? `translate(${originX}%, ${originY}%)` : undefined,
+          transform: (originX || originY || scale !== 100) ? `translate(${originX}%, ${originY}%) scale(${scale/100})` : undefined,
         }}
       />
     );

@@ -68,11 +68,17 @@ function Workspace(){
 
   return (
     <div className={'app' + (solo ? ' solo' : '')}>
-      <LeftRail layers={layers} dispatch={dispatch} selectedId={selectedId} onSelect={setSelectedId} addMenuOpen={addMenuOpen} setAddMenuOpen={setAddMenuOpen} applyPreset={applyPreset} crossfadeDip={crossfadeDip} />
+      <LeftRail layers={layers} dispatch={dispatch} selectedId={selectedId} onSelect={setSelectedId} addMenuOpen={addMenuOpen} setAddMenuOpen={setAddMenuOpen} applyPreset={applyPreset} crossfadeDip={crossfadeDip} stageRef={stageRef} />
       <div className="stagewrap" ref={stageRef}>
         <video ref={videoRef} className="basevideo" muted playsInline />
         <Backdrop />
         <Stage layers={layers} />
+        {layers.length === 0 && !solo && (
+          <div className="stage-null">
+            <span className="stage-null-title">HARD RESET</span>
+            <span className="stage-null-sub">Create a build and add layers to get started</span>
+          </div>
+        )}
         {selectedId && !solo && (
           <div
             className="stage-drag-overlay"

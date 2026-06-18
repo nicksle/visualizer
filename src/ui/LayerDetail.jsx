@@ -41,6 +41,11 @@ export default function LayerDetail({ layer, dispatch }){
           <span className="val">{Math.round(layer.opacity*100)}%</span>
         </div>
         <div className="ctrl">
+          <label>Scale</label>
+          <input type="range" min="10" max="200" step="1" value={layer.scale || 100} onChange={e => set({ scale:+e.target.value })} />
+          <span className="val">{layer.scale || 100}%</span>
+        </div>
+        <div className="ctrl">
           <label>Blend</label>
           <select value={layer.blend} onChange={e => set({ blend:e.target.value })}>
             {BLEND_MODES.map(b => <option key={b} value={b}>{b}</option>)}

@@ -33,8 +33,8 @@ export default function Backdrop(){
       ctx.clearRect(0,0,W,H);
       return;
     }
-    const draw = (BACKDROPS[bd.key] || BACKDROPS.ember).draw;
-    draw(ctx, t, W, H, lvl);
+    const entry = BACKDROPS[bd.key] || BACKDROPS.ember;
+    entry.draw(ctx, t, W, H, lvl, bd.opts);
   }, [engine]));
 
   return (
